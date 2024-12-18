@@ -13,6 +13,9 @@ pinecone-client = "^5.0.1"
 python-dotenv = "^1.0.1"
 streamlit = "^1.39.0"
 pymupdf = "^1.24.11"
+langchain-text-splitters = "^0.3.3"
+pypdf = "^5.1.0"
+google-genai = "^0.3.0"
 
 
 [build-system]
