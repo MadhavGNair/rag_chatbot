@@ -1,5 +1,6 @@
-# any embeddings file
+# any folders used for cache or temporary files
 embeddings/
+response/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
