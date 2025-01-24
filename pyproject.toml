@@ -6,17 +6,15 @@ authors = ["Madhav Girish Nair <madhavgirish02@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
-langchain = "^0.3.2"
-langchain-community = "^0.3.1"
-pinecone-client = "^5.0.1"
+python = "^3.10"
 python-dotenv = "^1.0.1"
-streamlit = "^1.39.0"
-pymupdf = "^1.24.11"
-langchain-text-splitters = "^0.3.3"
+gemini-api = "^0.1.6"
+langchain = "^0.3.15"
+clickhouse-connect = "^0.8.14"
+langchain-community = "^0.3.15"
 pypdf = "^5.1.0"
-google-genai = "^0.3.0"
-
+google-generativeai = "^0.8.4"
+pandas = "^2.2.3"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,52 +1,67 @@
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
-import logging
+import google.generativeai as genai
+import pandas as pd
 from dotenv import load_dotenv
 
-from google import genai
-
-from langchain.prompts import PromptTemplate
-from langchain_core.messages import AIMessage
-from langchain_core.runnables import RunnableLambda
-from langchain_community.document_loaders import PyPDFLoader
-
 load_dotenv()
-logging.basicConfig(level=logging.INFO)
-
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 class PDFChatbot:
     def __init__(self, pdf_path):
         self.pdf_path = pdf_path
-        self.model_name = 'gemini-2.0-flash-exp'
+        self.pdf_name = os.path.basename(pdf_path)
 
-        self.client = genai.Client(
-            api_key=os.getenv("GEMINI_API_KEY"),
-            http_options={"api_version": "v1alpha"},
-        )
-
-    def load_pdf(self):
+    def __load_and_split(self):
+        # load the text from the pdf
         loader = PyPDFLoader(self.pdf_path)
-        docs = loader.load()
-        texts = [doc.page_content for doc in docs]
-        return texts
+        pages = loader.load_and_split()
+        text = "\n".join([doc.page_content for doc in pages])
 
-    def summarize_texts(self, texts):
-        prompt = """You are an expert tasked with summarizing text for retrieval. \
-                    These summaries will be embedded and used to retrieve the raw text. \
-                    Give a concise summary of the text that is well optimized for retrieval. Text: {element} """
-        summaries = []
-        for text in texts:
-            response = self.client.models.generate_content(
-                model=self.model_name, contents=[text, prompt]
-            )
-            summaries.extend(response.text)
+        # split the text
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=500,
+            chunk_overlap=150,
+            length_function=len,
+            is_separator_regex=False,
+        )
+        docs = text_splitter.create_documents([text])
+        for i, d in enumerate(docs):
+            d.metadata = {"doc_id": i}
+        return docs
 
-        with open('summaries.txt', 'w') as f:
-            f.write('\n===\n'.join(summaries))
+    def __generate_embeddings(self, docs):
+        if os.path.exists(f'./embeddings/{self.pdf_name}.csv'):
+            print(f'Loading embeddings from file: {self.pdf_name}.csv')
+            return pd.read_csv(f'./embeddings/{self.pdf_name}.csv')
+        
+        # If file doesn't exist, generate new embeddings
+        print(f'Generating embeddings for {self.pdf_name}')
+        def get_embeddings(text):
+            model = 'models/text-embedding-004'
+            embedding = genai.embed_content(model=model,
+                                            content=text,
+                                            task_type="retrieval_document")
+            return embedding['embedding']
+        
+        content_list = [doc.page_content for doc in docs]
+        embeddings = [get_embeddings(content) for content in content_list]
+
+        dataframe = pd.DataFrame({
+            'page_content': content_list,
+            'embeddings': embeddings
+        })
+        dataframe.to_csv(f'./embeddings/{self.pdf_name}.csv', index=False)
+        return dataframe
+
+    def query_chatbot(self):
+        docs = self.__load_and_split()
+        df = self.__generate_embeddings(docs)
+        print(df.head())
 
 
 if __name__ == "__main__":
     pdf_path = "./pdfs/quaternions.pdf"
     chatbot = PDFChatbot(pdf_path)
-    texts = chatbot.load_pdf()
-    chatbot.summarize_texts(texts)
-
+    chatbot.query_chatbot()
