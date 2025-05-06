@@ -1,6 +1,5 @@
 # any folders used for cache or temporary files
-embeddings/
-response/
+*.pdf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
