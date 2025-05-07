@@ -18,14 +18,13 @@ RUN dnf update -y && \
 RUN poetry config virtualenvs.create false
 
 # Install dependencies
-RUN poetry install --no-interaction --no-root
+RUN poetry install --no-interaction --no-root --without dev
 
 # Copy application code
-COPY rag_chatbot/ rag_chatbot/
-COPY app/ app/
+COPY . ./
 
 # Set the command to run the application
-CMD ["python", "app/main.py"]
+CMD ["python", "/app/main.py"]
 
 # Optional: For local testing
 EXPOSE 8000

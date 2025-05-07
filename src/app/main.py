@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+
 import uvicorn
 from fastapi import FastAPI
 from mangum import Mangum
@@ -12,7 +13,7 @@ if parent_dir not in sys.path:
 from app.api import initialize_chatbot, query_chatbot
 
 app = FastAPI()
-handler = Mangum(app)   # entry point for AWS Lambda
+lambda_handler = Mangum(app)  # entry point for AWS Lambda
 
 app.post("/init")(initialize_chatbot)
 app.post("/query")(query_chatbot)

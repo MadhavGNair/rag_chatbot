@@ -1,3 +1,11 @@
+# CDK
+cdk.out/
+cdk.context.json
+.venv/  # or whatever your Python virtual environment is called
+__pycache__/  # Python cache
+*.pyc        # Compiled Python files
+.DS_Store # Mac OS
+
 # any folders used for cache or temporary files
 *.pdf
 
@@ -17,7 +25,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/
 lib64/
 parts/
 sdist/
