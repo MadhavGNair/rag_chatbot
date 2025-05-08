@@ -1,13 +1,11 @@
-from aws_cdk import (
-    Stack,
-    Duration,
-    aws_lambda as _lambda,
-    aws_apigateway as apigateway,
-    aws_iam as iam,
-    CfnOutput
-)
-from constructs import Construct
 import os
+
+from aws_cdk import CfnOutput, Duration, Stack
+from aws_cdk import aws_apigateway as apigateway
+from aws_cdk import aws_iam as iam
+from aws_cdk import aws_lambda as _lambda
+from constructs import Construct
+
 
 def get_relative_path():
     current_file = os.path.realpath(__file__)
@@ -16,8 +14,10 @@ def get_relative_path():
 
     return root_dir
 
+
 def get_project_root():
     return os.path.join(get_relative_path())
+
 
 class ChatbotCdkStack(Stack):
 
@@ -26,17 +26,16 @@ class ChatbotCdkStack(Stack):
 
         # create the Lambda Function from the Docker Image
         lambda_function = _lambda.DockerImageFunction(
-            self, "RAGChatbotLambda",
+            self,
+            "RAGChatbotLambda",
             code=_lambda.DockerImageCode.from_image_asset(
                 directory=os.path.join(get_project_root(), "src"),
-                exclude=["chatbot_cdk", "cdk.out", "venv", ".venv"]
+                exclude=["chatbot_cdk", "cdk.out", "venv", ".venv"],
             ),
             architecture=_lambda.Architecture.X86_64,
             memory_size=1024,
             timeout=Duration.seconds(30),
-            environment={
-                "ENVIRONMENT": "PRODUCTION"
-            }
+            environment={"ENVIRONMENT": "PRODUCTION"},
         )
 
         functionUrl = lambda_function.add_function_url(
